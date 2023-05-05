@@ -14,25 +14,37 @@ class DoppelChecker
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $registUsername, string $registEmail): Response
+    public function handle(Request $request, Closure $next): Response
     {
-        $duplicate = false;
+        $username = $request->input("username");
+        $email = $request->input("email");
+        $password = $request->input("password");
 
-        if (Account::where('username', $registUsername)->exists()) {
-            $duplicate = true;
-        } elseif (Account::where('email', $registEmail)->exists()) {
-            $duplicate = true;
+        $accountQuery = Account::where([
+            "username" => $username,
+            "email" => $email,
+        ]);
+
+        if (!$accountQuery->exists()) {
+            $request->merge([
+                "status" => "200",
+                "request" => "accepted",
+                "username" => $username,
+                "email" => $email,
+                "password" => $password,
+                "middleware" => "DoppelChecker"
+            ]);
+
         } else {
-            $duplicate = false;
+            $request->merge([
+                "status" => "417",
+                "request" => "rejected",
+                "cause" => "duplicate data",
+                "middleware" => "DoppelChecker",
+            ]);
+
         }
 
-        if ($duplicate) {
-            $request->attributes->add(['duplicate' => $duplicate]);
-            error_log($request);
-            return redirect()->back()->withErrors("duplicate data detected");
-        } else {
-            return $next($request);
-        }
+        return $next($request);
     }
-
 }
