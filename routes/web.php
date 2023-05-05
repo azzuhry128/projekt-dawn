@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\UserController;
 use App\Http\Livewire\HomePage;
 use App\Http\Livewire\LoginPage;
 use App\Http\Livewire\RegistrationPage;
 use App\Http\Livewire\WelcomePage;
 use App\Http\Middleware\DoppelChecker;
+use App\Http\Middleware\HelloWorld;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,18 +20,30 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', WelcomePage::class);
+// Route::get('/', WelcomePage::class);
 
-Route::get('/login', LoginPage::class);
+// Route::get('/login', LoginPage::class);
 
-Route::get(
-  '/registration',
-  RegistrationPage::class
-);
+// Route::get(
+//   '/registration',
+//   RegistrationPage::class
+// );
+
+// Route::post(
+//   '/registration',
+//   RegistrationPage::class
+// )->middleware(DoppelChecker::class);
+
+// Route::get('/auth/home', HomePage::class);
 
 Route::post(
   '/registration',
-  RegistrationPage::class
-)->middleware(DoppelChecker::class);
+  [
+    UserController::class,
+    'storeNewUser'
+  ]
+)->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+  ->withoutMiddleware(HelloWorld::class)
+  ->middleware(DoppelChecker::class);
 
-Route::get('/auth/home', HomePage::class);
+Route::get('/registration', [UserController::class, 'getRegistrationPage'])->middleware(HelloWorld::class);
