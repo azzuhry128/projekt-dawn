@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         //
         Schema::create('accounts', function (Blueprint $account) {
-            $account->id();
+            $account->string('id', 128)->primary();
             $account->string('username', 24);
             $account->string('email', 36);
             $account->string('password', 255);
