@@ -32,7 +32,5 @@ class UserController extends Controller
         } else {
             return response($request->only(['passport', 'status']));
         }
-
-
     }
 }

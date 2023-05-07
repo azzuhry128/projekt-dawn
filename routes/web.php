@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Livewire\HomePage;
 use App\Http\Livewire\LoginPage;
@@ -7,6 +8,7 @@ use App\Http\Livewire\RegistrationPage;
 use App\Http\Livewire\WelcomePage;
 use App\Http\Middleware\DoppelChecker;
 use App\Http\Middleware\HelloWorld;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -47,3 +49,8 @@ Route::post(
   ->middleware(DoppelChecker::class);
 
 Route::get('/registration', [UserController::class, 'getRegistrationPage'])->middleware(HelloWorld::class);
+
+Route::post('/user/task/create', [TaskController::class, 'createNewTask'])
+  ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+  ->withoutMiddleware(HelloWorld::class)
+  ->withoutMiddleware(DoppelChecker::class);
