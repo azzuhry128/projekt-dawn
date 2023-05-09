@@ -50,7 +50,8 @@ Route::post(
 
 Route::get('/registration', [UserController::class, 'getRegistrationPage'])->middleware(HelloWorld::class);
 
-Route::post('/user/task/create', [TaskController::class, 'createNewTask'])
-  ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
-  ->withoutMiddleware(HelloWorld::class)
-  ->withoutMiddleware(DoppelChecker::class);
+Route::post('/user/task/create', [TaskController::class, 'createNewTask']);
+
+Route::put('/user/task/update', [TaskController::class, 'updateTask']);
+
+Route::delete('/user/task/delete', [TaskController::class, 'deleteTask']);

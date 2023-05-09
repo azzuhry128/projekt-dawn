@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account;
-use Illuminate\Console\View\Components\Task;
+use App\Models\Task;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -13,7 +12,8 @@ class TaskController extends Controller
         $userIDForCreateReq = $request->input('user_id');
 
         if ($request->input('order') == 'create') {
-            $task = new \App\Models\Task;
+
+            $task = new Task;
             $task_id = strval(round(microtime(true) * 1000));
 
             $task->task_id = $task_id;
@@ -33,24 +33,36 @@ class TaskController extends Controller
 
     public function deleteTask(Request $request)
     {
-        $userIDForDeleteReq = $request->input('id');
-        $itemIDForDeleteReq = $request->input('item_id');
+        $userIDForDeleteReq = $request->input('user_id');
+        $taskIDForDeleteReq = $request->input('task_id');
 
         $order = "delete";
         $request->merge(["order" => $order]);
 
         if ($request->input('order') == 'delete') {
             # code...
-            Account::where('id', $userIDForDeleteReq)->where('item_id', $itemIDForDeleteReq)->delete();
+            Task::where('task_id', $taskIDForDeleteReq)->where('user_id', $userIDForDeleteReq)->delete();
+
+            $request->merge(["task_status" => "deleted"]);
         }
 
         return $request;
     }
     public function updateTask(Request $request)
     {
-        $order = "update";
 
+        $userIDForUpdateReq = $request->input('user_id');
+        $taskIDForUpdateReq = $request->input('task_id');
+
+        $updatedTitle = $request->input("title");
+
+        $order = "update";
         $request->merge(["order" => $order]);
+        if ($request->input("order") == "update") {
+            Task::where('task_id', $taskIDForUpdateReq)->where('user_id', $userIDForUpdateReq)->update(['title' => $updatedTitle]);
+        }
+
+        $request->merge(["task_status" => "updated"]);
         return $request;
     }
 }
