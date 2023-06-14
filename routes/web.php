@@ -6,10 +6,12 @@ use App\Http\Livewire\HomePage;
 use App\Http\Livewire\LoginPage;
 use App\Http\Livewire\RegistrationPage;
 use App\Http\Livewire\WelcomePage;
+use App\Http\Middleware\AccountDuplicationChecker;
 use App\Http\Middleware\DoppelChecker;
 use App\Http\Middleware\HelloWorld;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,36 +24,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/', WelcomePage::class);
 
-// Route::get('/login', LoginPage::class);
-
-// Route::get(
-//   '/registration',
-//   RegistrationPage::class
-// );
-
-// Route::post(
-//   '/registration',
-//   RegistrationPage::class
-// )->middleware(DoppelChecker::class);
-
-// Route::get('/auth/home', HomePage::class);
 
 Route::post(
   '/registration',
   [
     UserController::class,
-    'storeNewUser'
+    'registerNewUser'
   ]
-)->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
-  ->withoutMiddleware(HelloWorld::class)
-  ->middleware(DoppelChecker::class);
+);
 
-Route::get('/registration', [UserController::class, 'getRegistrationPage'])->middleware(HelloWorld::class);
+Route::post(
+  '/login',
+  [
+    UserController::class,
+    'login'
+  ]
+);
 
-Route::post('/user/task/create', [TaskController::class, 'createNewTask']);
+Route::get('/registration', [UserController::class, 'storeNewUser']);
 
-Route::put('/user/task/update', [TaskController::class, 'updateTask']);
+Route::post('/{user_id}/{task_id}/{method}', [TaskController::class, 'createNewTask']);
 
-Route::delete('/user/task/delete', [TaskController::class, 'deleteTask']);
+Route::put('/{user_id}/{task_id}/{method}', [TaskController::class, 'updateTask']);
+
+Route::delete('/{user_id}/{task_id}/{method}', [TaskController::class, 'deleteTask']);

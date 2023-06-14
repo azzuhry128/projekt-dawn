@@ -2,35 +2,75 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Accounts;
 use Illuminate\Http\Request;
-use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function getRegistrationPage()
+    public function registerNewUser(Request $request)
     {
-        return "welcome to registration page!";
+        $newUserRequestData = $this->getUserHttpRequest($request);
+        $checkedData = $this->checkForDataDuplication($newUserRequestData);
+        return $this->setAsNewUser($checkedData);
     }
-    public function storeNewUser(Request $request)
+
+    public function getUserHttpRequest($httpRequestData)
     {
-        $newUserId = Uuid::uuid4();
+        $username = $httpRequestData->username;
+        $email = $httpRequestData->email;
+        $password = $httpRequestData->password;
 
-        if ($request->input("status.request" ) == "accepted") {
+        $requestData = collect([
+            'username' => $username,
+            'email' => $email,
+            'password' => $password
+        ]);
+        return $requestData;
+    }
 
-            $newAccount = new Account;
+    public function checkForDataDuplication($checkUpData)
+    {
+        // print_r(var_dump($checkUpData));
+        // print_r($checkUpData['username']);
 
-            $newAccount->id = $newUserId;
-            $newAccount->username = $request->input("username");
-            $newAccount->email = $request->input("email");
-            $newAccount->password = Hash::make($request->input("password"));
+        $username = $checkUpData['username'];
+        $email = $checkUpData['email'];
 
-            $newAccount->save();
+        $query = Accounts::where('username', $username)->where('email', $email);
 
-            return response($request->only(['passport', 'status']));
+        if ($query->exists()) {
+            $mergedCheckupData = $checkUpData->merge(['status' => 'duplication']);
+            return $mergedCheckupData;
         } else {
-            return response($request->only(['passport', 'status']));
+            $mergedCheckupData = $checkUpData->merge(['status' => 'safe']);
+            return $mergedCheckupData;
         }
     }
+
+    public function setAsNewUser($userCandidateData)
+    {
+
+        if ($userCandidateData['status'] == 'duplication') {
+            return response()->json(["status" => "rejected"]);
+        } else {
+
+            // $account = new Accounts;
+            // $account->username = $userCandidateData->username;
+            // $account->email = $userCandidateData->email;
+            // $account->password = $userCandidateData->password;
+            // $account->save();
+            return response()->json(['status' => "new user added"]);
+        }
+    }
+
+
+
+    public function verifyNewUser()
+    {
+        //TODO verifying user via codes sent to email
+    }
+
+    //TODO user login mechanism, must be able to translate bcrypt
 }

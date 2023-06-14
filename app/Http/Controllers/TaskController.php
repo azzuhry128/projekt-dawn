@@ -7,17 +7,34 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
+
+    public function getAllTask(Request $request)
+    {
+        $method = $request->input('method');
+        $user_id = $request->input('user_id');
+
+        if ($method == 'get') {
+            //TODO make function that return tasks stored in local-storage for guest and server for logged-in user
+        } else {
+            $request->merge(["request status" => "rejected"]);
+        }
+
+        return response($request);
+    }
+
     public function createNewTask(Request $request)
     {
-        $userIDForCreateReq = $request->input('user_id');
+        //TODO create new task with task id generated from utc and user_id as foreign key
+        $method = $request->input('method');
+        $user_id = $request->input('user_id');
 
-        if ($request->input('order') == 'create') {
+        if ($method == 'post') {
 
             $task = new Task;
             $task_id = strval(round(microtime(true) * 1000));
 
             $task->task_id = $task_id;
-            $task->user_id = $userIDForCreateReq;
+            $task->user_id = $user_id;
             $task->title = $request->input("title");
             $task->priority = $request->input("priority");
             $task->status = $request->input("status");
@@ -33,15 +50,16 @@ class TaskController extends Controller
 
     public function deleteTask(Request $request)
     {
-        $userIDForDeleteReq = $request->input('user_id');
-        $taskIDForDeleteReq = $request->input('task_id');
+        //TODO delete task based on method retrieved from request object
 
-        $order = "delete";
-        $request->merge(["order" => $order]);
+        $method = $request->input('method');
 
-        if ($request->input('order') == 'delete') {
+        $user_id = $request->input('user_id');
+        $task_id = $request->input('task_id');
+
+        if ($method == 'delete') {
             # code...
-            Task::where('task_id', $taskIDForDeleteReq)->where('user_id', $userIDForDeleteReq)->delete();
+            Task::where('task_id', $task_id)->where('user_id', $user_id)->delete();
 
             $request->merge(["task_status" => "deleted"]);
         }
@@ -50,16 +68,16 @@ class TaskController extends Controller
     }
     public function updateTask(Request $request)
     {
+        //TODO update task based on user input "task"
+        $method = $request->input('method');
 
-        $userIDForUpdateReq = $request->input('user_id');
-        $taskIDForUpdateReq = $request->input('task_id');
+        $user_id = $request->input('user_id');
+        $task_id = $request->input('task_id');
+        $title = $request->input('title');
 
-        $updatedTitle = $request->input("title");
 
-        $order = "update";
-        $request->merge(["order" => $order]);
-        if ($request->input("order") == "update") {
-            Task::where('task_id', $taskIDForUpdateReq)->where('user_id', $userIDForUpdateReq)->update(['title' => $updatedTitle]);
+        if ($method == "update") {
+            Task::where('task_id', $user_id)->where('user_id', $task_id)->update(['title' => $title]);
         }
 
         $request->merge(["task_status" => "updated"]);
